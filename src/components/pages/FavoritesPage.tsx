@@ -1,24 +1,23 @@
-// src/components/pages/FavoritesPage.tsx
+import React, { useState, useMemo } from 'react';
+import { useDogs } from '../../contexts/DogsContext';
+import { DogCard } from '../dogs/DogCard';
+import { Pagination } from '../dogs/Pagination';
+
 export function FavoritesPage() {
   const { dogs, favorites } = useDogs();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
   // Get all favorited dogs
-  const favoriteDogs = useMemo(() => 
-    dogs.filter(dog => favorites.has(dog.id)), 
-    [dogs, favorites]
-  );
+  const favoriteDogs = useMemo(() => {
+    return dogs.filter(dog => favorites.has(dog.id));
+  }, [dogs, favorites]);
 
-  console.log('Favorites:', Array.from(favorites));
-  console.log('Available dogs:', dogs);
-  console.log('Filtered favorite dogs:', favoriteDogs);
-
-  const totalPages = Math.ceil(favoriteDogs.length / pageSize);
-  const currentDogs = favoriteDogs.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // Calculate pagination
+  const totalPages = Math.max(1, Math.ceil(favoriteDogs.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentDogs = favoriteDogs.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -32,9 +31,15 @@ export function FavoritesPage() {
       </h2>
       
       {favoriteDogs.length === 0 ? (
-        <div>No favorite dogs selected yet.</div>
+        <div className="text-center py-8">
+          <p>You haven't added any dogs to your favorites yet.</p>
+        </div>
       ) : (
         <>
+          <div className="mb-4">
+            Showing {startIndex + 1} - {Math.min(endIndex, favoriteDogs.length)} of {favoriteDogs.length} favorites
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {currentDogs.map(dog => (
               <DogCard 
@@ -49,8 +54,6 @@ export function FavoritesPage() {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
-              hasNextPage={currentPage < totalPages}
-              hasPrevPage={currentPage > 1}
             />
           )}
         </>

@@ -1,54 +1,81 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { authService } from '../services/api/auth';
+import { APIError, ErrorMessages } from '../utils/ErrorHandling';
 
-interface AuthContextType {
+interface AuthState {
   isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface AuthContextType extends AuthState {
   login: (name: string, email: string) => Promise<void>;
   logout: () => Promise<void>;
-  error: string | null;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<AuthState>({
+    isAuthenticated: false,
+    isLoading: false,
+    error: null,
+  });
+
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
 
   const login = useCallback(async (name: string, email: string) => {
     try {
-      setError(null);
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       await authService.login({ name, email });
-      setIsAuthenticated(true);
-    } catch (err) {
-      setError('Login failed. Please check your credentials and try again.');
-      throw err;
+      setState(prev => ({ ...prev, isAuthenticated: true, isLoading: false }));
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: error instanceof APIError ? error.message : ErrorMessages.AUTH.LOGIN_FAILED
+      }));
+      throw error;
     }
   }, []);
 
   const logout = useCallback(async () => {
     try {
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       await authService.logout();
-      setIsAuthenticated(false);
-    } catch (err) {
-      setError('Logout failed. Please try again.');
-      throw err;
+      setState({ isAuthenticated: false, isLoading: false, error: null });
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Logout failed. Please try again.'
+      }));
     }
   }, []);
 
   const value = {
-    isAuthenticated,
+    ...state,
     login,
     logout,
-    error
+    clearError
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}
+
+export { AuthContext };

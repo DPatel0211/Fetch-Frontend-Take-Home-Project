@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { DogsProvider } from './contexts/DogsContext';
 import { LoginForm } from './components/auth/LoginForm';
@@ -7,6 +8,7 @@ import { FavoritesPage } from './components/pages/FavoritesPage';
 import { MatchPage } from './components/pages/MatchPage';
 import { Layout } from './components/layout/Layout';
 import { useAuth } from './contexts/AuthContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 type Page = 'search' | 'favorites' | 'match';
 
@@ -23,9 +25,9 @@ function AppContent() {
       case 'search':
         return <DogSearch />;
       case 'favorites':
-        return <FavoritesPage />;
+        return <FavoritesPage onNavigate={setCurrentPage} />;
       case 'match':
-        return <MatchPage />;
+        return <MatchPage onNavigate={setCurrentPage} />;
       default:
         return <DogSearch />;
     }
@@ -38,14 +40,16 @@ function AppContent() {
   );
 }
 
-function App() {
+export default function App() {
   return (
-    <AuthProvider>
-      <DogsProvider>
-        <AppContent />
-      </DogsProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <AuthProvider>
+          <DogsProvider>
+            <AppContent />
+          </DogsProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }
-
-export default App;

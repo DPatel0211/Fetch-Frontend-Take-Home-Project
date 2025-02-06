@@ -1,26 +1,41 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { API_BASE_URL } from './config';
+import { APIError } from '../../utils/ErrorHandling';
 
 export const apiClient = axios.create({
-  baseURL: 'https://frontend-take-home-service.fetch.com',
+  baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 10000, // 10 second timeout
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Add response interceptor for logging
 apiClient.interceptors.response.use(
-  (response) => {
-    console.log(`API Response [${response.config.method?.toUpperCase()}] ${response.config.url}:`, response.data);
-    return response;
-  },
-  (error) => {
-    console.error('API Error:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data
-    });
-    return Promise.reject(error);
+  (response) => response,
+  (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      // Session expired
+      window.dispatchEvent(new CustomEvent('auth:sessionExpired'));
+      return Promise.reject(new APIError(
+        'Your session has expired. Please login again.',
+        401,
+        'SESSION_EXPIRED'
+      ));
+    }
+
+    if (!error.response) {
+      // Network error
+      return Promise.reject(new APIError(
+        'Unable to connect to the server. Please check your internet connection.',
+        0,
+        'NETWORK_ERROR'
+      ));
+    }
+
+    return Promise.reject(new APIError(
+      error.response.data?.message || 'An unexpected error occurred.',
+      error.response.status
+    ));
   }
 );

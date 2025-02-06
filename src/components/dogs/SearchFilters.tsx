@@ -62,8 +62,8 @@ export function SearchFilters({ breeds, onFilterChange, currentFilters }: Search
           )}
           <option value="name:asc">Name (A-Z)</option>
           <option value="name:desc">Name (Z-A)</option>
-          <option value="age:asc">Age by Youngest</option>
-          <option value="age:desc">Age by Oldest</option>
+          <option value="age:asc">Age (by Youngest)</option>
+          <option value="age:desc">Age (by Oldest)</option>
         </select>
       </div>
 
@@ -78,8 +78,6 @@ export function SearchFilters({ breeds, onFilterChange, currentFilters }: Search
           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
         />
         <div className="flex justify-between text-xs text-gray-600">
-          <span>0</span>
-          <span>{maxAgeLimit} years</span>
         </div>
       </div>
 

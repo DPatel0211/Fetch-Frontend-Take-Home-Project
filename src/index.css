@@ -1,41 +1,122 @@
+/* index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-synthesis: none;
+body {
+  background-color: #F9FAFB;
+}
+
+@layer components {
+  .page-transition {
+    transition: all 300ms ease-in-out;
+  }
+  
+  .dog-card {
+    background-color: #FFFFFF;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 300ms ease-in-out;
   }
 
-  body {
-    margin: 0;
-    min-width: 320px;
-    min-height: 100vh;
+  .dog-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
   }
 
-  a {
-    color: #646cff;
-    text-decoration: inherit;
-    font-weight: 500;
+  .dog-card-image-container {
+    position: relative;
+    width: 100%;
+    height: 12rem;
+    overflow: hidden;
   }
 
-  a:hover {
-    color: #535bf2;
+  .dog-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 300ms ease-in-out;
   }
 
-  button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    transition: border-color 0.25s;
+  .dog-card-image:hover {
+    transform: scale(1.05);
   }
+
+  .dog-card-content {
+    padding: 1rem;
+  }
+
+  .dog-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .dog-card-info {
+    font-size: 0.875rem;
+    color: #4B5563;
+    margin-bottom: 0.25rem;
+  }
+
+  .favorite-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    transition: all 300ms ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .favorite-button-active {
+    background-color: #EC4899;
+  }
+
+  .favorite-button-active:hover {
+    background-color: #DB2777;
+  }
+
+  .favorite-button-inactive {
+    background-color: #3B82F6;
+  }
+
+  .favorite-button-inactive:hover {
+    background-color: #2563EB;
+  }
+
+  .favorite-button svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #FFFFFF;
+  }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 300ms ease-in forwards;
+}
+
+.slide-up {
+  animation: slideUp 300ms ease-out forwards;
 }

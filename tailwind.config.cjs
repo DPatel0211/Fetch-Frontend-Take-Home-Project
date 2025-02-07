@@ -28,10 +28,22 @@ module.exports = {
           900: '#111827',
         }
       },
+      scale: {
+        '102': '1.02',
+      }
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
   ],
   darkMode: 'class',
+  safelist: [
+    'bg-gray-50',
+    'bg-gray-100',
+    'bg-gray-200',
+    'text-gray-600',
+    'text-gray-800',
+    'hover:bg-gray-100',
+    'hover:bg-gray-200'
+  ]
 }

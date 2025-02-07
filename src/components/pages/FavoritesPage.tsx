@@ -10,25 +10,29 @@ interface FavoritesPageProps {
 }
 
 export function FavoritesPage({ onNavigate }: FavoritesPageProps) {
-  const { dogs, favorites, error, loading, clearError } = useDogs();
+  const { dogs, favorites, favoriteDogs, error, loading, clearError } = useDogs();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
-  const favoriteDogs = useMemo(() => {
+  const favoritedDogs = useMemo(() => {
     try {
-      return dogs.filter(dog => favorites.has(dog.id));
+      return Array.from(favorites).map(id => {
+        // First check current dogs array
+        const dogInCurrent = dogs.find(d => d.id === id);
+        // If not in current dogs, get from favoriteDogs Map
+        return dogInCurrent || favoriteDogs.get(id);
+      }).filter(Boolean);
     } catch (error) {
       console.error('Error filtering favorites:', error);
       return [];
     }
-  }, [dogs, favorites]);
+  }, [dogs, favorites, favoriteDogs]);
 
-  // Pagination calculations
+  // Rest of your component stays exactly the same...
   const startIndex = (currentPage - 1) * pageSize;
-  const totalPages = Math.ceil(favoriteDogs.length / pageSize);
-  const currentDogs = favoriteDogs.slice(startIndex, startIndex + pageSize);
+  const totalPages = Math.ceil(favoritedDogs.length / pageSize);
+  const currentDogs = favoritedDogs.slice(startIndex, startIndex + pageSize);
 
-  // Page change handler
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -41,7 +45,7 @@ export function FavoritesPage({ onNavigate }: FavoritesPageProps) {
     return <ErrorDisplay error={error} onDismiss={clearError} />;
   }
 
-  if (favoriteDogs.length === 0) {
+  if (favoritedDogs.length === 0) {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-bold mb-4">My Favorites</h2>
@@ -61,12 +65,12 @@ export function FavoritesPage({ onNavigate }: FavoritesPageProps) {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">
-          My Favorites ({favoriteDogs.length})
+          My Favorites ({favoritedDogs.length})
         </h2>
       </div>
 
       <div className="mb-4">
-        Showing {startIndex + 1} - {Math.min(startIndex + pageSize, favoriteDogs.length)} of {favoriteDogs.length} favorites
+        Showing {startIndex + 1} - {Math.min(startIndex + pageSize, favoritedDogs.length)} of {favoritedDogs.length} favorites
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -6,6 +6,7 @@ interface DogsState {
   dogs: Dog[];
   breeds: string[];
   favorites: Set<string>;
+  favoriteDogs: Map<string, Dog>;  // Added this to store favorite dog data
   loading: boolean;
   error: string | null;
   totalResults: number;
@@ -26,6 +27,7 @@ export function DogsProvider({ children }: { children: React.ReactNode }) {
     dogs: [],
     breeds: [],
     favorites: new Set<string>(),
+    favoriteDogs: new Map<string, Dog>(),  // Initialize the Map
     loading: false,
     error: null,
     totalResults: 0
@@ -54,18 +56,13 @@ export function DogsProvider({ children }: { children: React.ReactNode }) {
       }
 
       const dogsData = await dogService.getDogs(searchResult.resultIds);
-      setState(prev => {
-        // Preserve dogs that are in favorites
-        const favoriteDogs = prev.dogs.filter(dog => prev.favorites.has(dog.id));
-        const newDogs = dogsData.filter(dog => !prev.favorites.has(dog.id));
-        return {
-          ...prev,
-          dogs: [...favoriteDogs, ...newDogs],
-          totalResults: searchResult.total,
-          loading: false,
-          error: null
-        };
-      });
+      setState(prev => ({
+        ...prev,
+        dogs: dogsData,
+        totalResults: searchResult.total,
+        loading: false,
+        error: null
+      }));
     } catch (error) {
       console.error('Error fetching dogs:', error);
       setState(prev => ({
@@ -98,14 +95,23 @@ export function DogsProvider({ children }: { children: React.ReactNode }) {
   const toggleFavorite = useCallback((dogId: string) => {
     setState(prev => {
       const newFavorites = new Set(prev.favorites);
+      const newFavoriteDogs = new Map(prev.favoriteDogs);
+      
       if (newFavorites.has(dogId)) {
         newFavorites.delete(dogId);
+        newFavoriteDogs.delete(dogId);
       } else {
-        newFavorites.add(dogId);
+        const dog = prev.dogs.find(d => d.id === dogId);
+        if (dog) {
+          newFavorites.add(dogId);
+          newFavoriteDogs.set(dogId, dog);
+        }
       }
+
       return {
         ...prev,
-        favorites: newFavorites
+        favorites: newFavorites,
+        favoriteDogs: newFavoriteDogs
       };
     });
   }, []);
